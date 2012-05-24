@@ -9,21 +9,33 @@ import org.apache.hadoop.mapreduce.JobContext;
 import org.apache.hadoop.mapreduce.lib.input.FileSplit;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 
+/**
+ * Overrided {@link TextInputFormat}.
+ * @author sinchii
+ *
+ */
 public class ZeroByteIgnoreTextInputFormat extends TextInputFormat {
 
-	public List<InputSplit> getSplits(JobContext job)
-		throws IOException {
+  /**
+   * Generate the list of files without zero byte
+   * and make them into FileSplits.
+   * @return the list of FileSplits without zero byte split
+   */
+  public List<InputSplit> getSplits(JobContext job)
+      throws IOException {
 		
-		List<InputSplit> splits = super.getSplits(job);
-		List<InputSplit> newSplits = new ArrayList<InputSplit>();
-		
-		for (int i = 0; i < splits.size(); i++) {
-			FileSplit fs = (FileSplit) splits.get(i);
-			if (fs.getLength() != 0) {
-				newSplits.add(fs);
-			}
-		}
-		
-		return newSplits;
-	}
+    // Set splits by FileInputFormat.getSplits()
+    List<InputSplit> splits = super.getSplits(job);
+    List<InputSplit> newSplits = new ArrayList<InputSplit>();
+    
+    for (int i = 0; i < splits.size(); i++) {
+      FileSplit fs = (FileSplit) splits.get(i);
+      
+      // Set Not 0 byte FileSplit 
+      if (fs.getLength() != 0) {
+        newSplits.add(fs);
+       }
+    }
+    return newSplits;
+  }
 }
