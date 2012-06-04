@@ -1,4 +1,4 @@
-package net.sinchii.hadoop.mapred.lib.output;
+package net.sinchii.hadoop.mapreduce.lib.output;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
