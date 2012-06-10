@@ -6,9 +6,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import org.apache.hadoop.mapred.Counters;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.JobID;
 import org.apache.hadoop.mapred.TaskReport;
+import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapreduce.Job;
 
 public class JobSummaryOutput {
@@ -30,17 +33,16 @@ public class JobSummaryOutput {
     printJobSummary(jobID);
   }
 
-  @SuppressWarnings("deprecation")
   public void printJobSummary(String filename) throws IOException {
 
     // get Job status
     JobConf jobConf = new JobConf(job.getConfiguration());
     JobClient jc = new JobClient(jobConf);
 
-    TaskReport[] mapTasks = jc.getMapTaskReports(jobID);
-    TaskReport[] reduceTasks = jc.getReduceTaskReports(jobID);
+    TaskReport[] mapTasks = jc.getMapTaskReports(JobID.forName(jobID));
+    TaskReport[] reduceTasks = jc.getReduceTaskReports(JobID.forName(jobID));
 
-    // print Job stauts
+    // print Job status
     File file = new File(filename);
     PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 
@@ -48,7 +50,11 @@ public class JobSummaryOutput {
       pw.print(m.getTaskID().toString() + ","
           + m.getStartTime() + ","
           + m.getFinishTime() + ".");
-      // TODO print counter
+      for (Counters.Group g : m.getCounters()) {
+        for (Counter c : g) {
+          pw.print(c.getCounter());
+        }
+      }
       pw.println();
     }
 
@@ -56,11 +62,13 @@ public class JobSummaryOutput {
       pw.print(r.getTaskID().toString() + ","
           + r.getStartTime() + ","
           + r.getFinishTime() + ".");
-
-      // TODO print counter
+      for (Counters.Group g : r.getCounters()) {
+        for (Counter c : g) {
+          pw.print(c.getCounter());
+        }
+      }
       pw.println();
     }
-
     pw.close();
   }
 }
